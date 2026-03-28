@@ -1,3 +1,9 @@
+#
+# Problem Statement: Read customers.csv and orders.csv, clean the data by removing invalid or missing values, 
+# and keep only valid customer-order records. Then aggregate orders per customer to calculate total orders, total amount, 
+# and average amount. Finally, save the result as customer_order_summary.csv.
+#
+
 import pandas as pd
 
 Orders_path='/Users/aparya/Downloads/Docs/Orders.csv'
@@ -40,4 +46,5 @@ total_count=pending_orders.groupby("PaymentMethod").agg({"TotalAmount":"sum",
 
 customer_and_orders=orders_df.merge(customers_df,how='inner',on="CustomerID")
 ordersin2023=customer_and_orders[customer_and_orders["OrderDate"].str.contains('2024')]
-print(ordersin2023)
+ordersin2023.to_csv("Ordersin2023")
+total_count.to_csv("Total.csv")
