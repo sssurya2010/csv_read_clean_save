@@ -1,10 +1,11 @@
 #
 # Problem Statement: Read customers.csv and orders.csv, clean the data by removing invalid or missing values, 
 # and keep only valid customer-order records. Then aggregate orders per customer to calculate total orders, total amount, 
-# and average amount. Finally, save the result as customer_order_summary.csv.
+# and average amount. Finally, save top 20 customers as top_customer_order_summary.csv.
 #
 
 import pandas as pd
+
 
 Orders_path='/Users/aparya/Downloads/Docs/Orders.csv'
 Customers_path='/Users/aparya/Downloads/Docs/Customers.csv'
@@ -14,37 +15,13 @@ Customers_path='/Users/aparya/Downloads/Docs/Customers.csv'
 orders_df=pd.read_csv(Orders_path)
 customers_df=pd.read_csv(Customers_path)
 
-# print(df.count())
-# print(df.head())
-# print(df.tail())
-# print(df.info())
-# print(df.describe())
-# print(df.columns)
-# print(df.shape)
 
-pending_orders=orders_df[orders_df['OrderStatus']=='Pending']
-# print(pending_orders)
+customers_with_orders=customers_df.merge(orders_df,how="inner",on="CustomerID",suffixes=["_cust","_ordr"])
 
-shipped_orders=orders_df[orders_df['OrderStatus']=='Shipped']
+customers_with_orders=customers_with_orders[customers_with_orders["TotalAmount"]>0]
 
-pending_shipped_orders = pd.merge(pending_orders,shipped_orders,how='inner', on='CustomerID')
-pending_shipped_orders2=pending_orders.join(shipped_orders,on='CustomerID',how='inner',lsuffix="_left",rsuffix='_right')
+aggregate_orders=customers_with_orders.groupby(["Name","Email"])["TotalAmount"].sum()
 
-distinct_order_types=orders_df['OrderStatus'].unique()
+aggregate_orders.sort_values(by="TotalAmount",ascending=False)
 
-# print(pending_shipped_orders.sort_values(by=["CustomerID"]))
-# print(pending_shipped_orders['OrderStatus_x'].unique())
-
-# pending_shipped_orders.to_csv("output.csv")
-# pending_shipped_orders2.to_csv("output2.csv")
-
-total_pending_orders_amount=pending_orders.groupby("PaymentMethod")["TotalAmount"].sum()
-total_count=pending_orders.groupby("PaymentMethod").agg({"TotalAmount":"sum",
-                                                         "CustomerID":"nunique"})
-
-# print(customers_df.columns)
-
-customer_and_orders=orders_df.merge(customers_df,how='inner',on="CustomerID")
-ordersin2023=customer_and_orders[customer_and_orders["OrderDate"].str.contains('2024')]
-ordersin2023.to_csv("Ordersin2023")
-total_count.to_csv("Total.csv")
+print(aggregate_orders)
