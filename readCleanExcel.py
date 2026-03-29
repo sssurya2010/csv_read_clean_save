@@ -16,12 +16,11 @@ orders_df=pd.read_csv(Orders_path)
 customers_df=pd.read_csv(Customers_path)
 
 
-customers_with_orders=customers_df.merge(orders_df,how="inner",on="CustomerID",suffixes=["_cust","_ordr"])
+customer_orders=customers_df.merge(orders_df,how="inner",on="CustomerID",suffixes=["_cust","_ordr"]).copy()
 
-customers_with_orders=customers_with_orders[customers_with_orders["TotalAmount"]>0]
+customer_agg=customer_orders[customer_orders["TotalAmount"]>0].copy()
 
-aggregate_orders=customers_with_orders.groupby(["Name","Email"])["TotalAmount"].sum()
+customer_final=(customer_orders.groupby(["Name","Email"])["TotalAmount"].sum().to_frame())
 
-aggregate_orders.sort_values(by="TotalAmount",ascending=False)
 
-print(aggregate_orders)
+print(customer_final.sort_values(by="TotalAmount",ascending=False).head(20))
